@@ -77,7 +77,6 @@ FORCE_SUB_CHANNELS = [
 2. Add your API access keys (one per line):
 
 ```text
-8c0ab9677843d267628887fec4233dcc
 your_second_access_key_here
 your_third_access_key_here
 your_fourth_access_key_here
@@ -123,14 +122,14 @@ Exports users and queries data to Excel file
 ## 🔑 API Information
 
 ### API 1: Truecaller Lookup
-- **URL**: `https://true-call-check.vercel.app/api/truecaller?q={phone_number}`
+- **URL**: `https://xxxxxxxxx.xxx/xxxx/xxx/xxx/xxxxx?q={phone_number}`
 - **Purpose**: Get caller name and ID information
 - **Rate Limit**: No specific limit mentioned
 
 ### API 2: Phone Validation
-- **URL**: `http://apilayer.net/api/validate`
+- **URL**: `http://xxxxxxxxx.xxx/xxx/validate`
 - **Purpose**: Validate phone numbers and get detailed info
-- **Rate Limit**: 100 requests per access key per month
+- **Rate Limit**: 1000000000 requests per access key per month
 - **Auto-rotation**: Bot automatically switches keys when limit reached
 
 ## 📱 Phone Number Format
