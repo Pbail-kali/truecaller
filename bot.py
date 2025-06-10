@@ -33,12 +33,14 @@ logging.getLogger("telegram.ext").setLevel(logging.WARNING)
 logging.getLogger("telegram.bot").setLevel(logging.WARNING)
 
 # Suppress asyncio and pyrogram peer id errors
-def ignore_peer_id_error(message, category, filename, lineno, file=None, line=None):
-    if "Peer id invalid" in str(message):
-        return
-    return warnings.defaultaction
+class IgnorePeerIdInvalid(logging.Filter):
+    def filter(self, record):
+        return "Peer id invalid" not in record.getMessage()
 
-warnings.showwarning = ignore_peer_id_error
+logging.getLogger("asyncio").addFilter(IgnorePeerIdInvalid())
+logging.getLogger("pyrogram").addFilter(IgnorePeerIdInvalid())
+
+# warnings.showwarning = ignore_peer_id_error
 
 class TruecallerBot:
     def __init__(self):
@@ -340,6 +342,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     is_new = bot_instance.save_user(user.id, user.username, user.first_name)
 
+    # 1. Sabse pehle sticker bhejo aur uska message object save karo
+    sticker_msg = None
+    try:
+        sticker_msg = await update.message.reply_sticker("CAACAgQAAxkBAAEOrJ9oR9rh3jB2r1I3Qb5TZey80JIU-QACnxEAAqbxcR57wYUDyflSITYE")
+    except Exception as e:
+        logger.error(f"Sticker send error: {e}")
+
     # --- Log to channel only for new users ---
     if is_new:
         log_text = (
@@ -364,14 +373,20 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "🔍 I can help you find phone number details just like Truecaller!\n\n"
             "⚠️ To use this bot, you must join our channels first:"
         )
-        
+        # Sticker delete karo (agar bheja gaya tha)
+        if sticker_msg:
+            try:
+                await sticker_msg.delete()
+            except Exception as e:
+                logger.error(f"Sticker delete error: {e}")
+
         await update.message.reply_photo(
             photo=BotConfig.WELCOME_IMAGE,
             caption=welcome_text,
             reply_markup=await bot_instance.get_subscription_keyboard(context.bot)
         )
         return
-    
+
     welcome_text = bot_instance.stylize_text(
         f"🎉 Welcome {user.first_name}!\n\n"
         "🔍 I can help you find phone number details just like Truecaller!\n\n"
@@ -385,7 +400,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "📝 Format: 98xxxxxxxx or +919xxxxxxxx\n\n"
         "💡 Example: 9876543210"
     )
-    
+
+    # Sticker delete karo (agar bheja gaya tha)
+    if sticker_msg:
+        try:
+            await sticker_msg.delete()
+        except Exception as e:
+            logger.error(f"Sticker delete error: {e}")
+
     await update.message.reply_photo(
         photo=BotConfig.WELCOME_IMAGE,
         caption=welcome_text
